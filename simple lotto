@@ -1,0 +1,131 @@
+package game;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Random;
+import java.util.Scanner;
+
+public class Lotto {
+
+	public ArrayList <Integer> ticket() {
+		
+		ArrayList <Integer> ticket = new ArrayList <Integer> ();
+		Random rand = new Random();
+		int num;
+		
+		while(true) {
+    
+			num = rand.nextInt(45)+1;
+			
+			//no same number
+			if(ticket.indexOf(num)==-1) {ticket.add(num);}
+			
+			//get six different numbers
+			if(ticket.size()==6) {
+				Collections.sort(ticket);
+				break;
+			}
+		}
+		
+		//one ticket, six numbers
+		return ticket;
+	}
+	
+  
+	public void print() {
+		
+		ArrayList <Integer> numbers =ticket();
+		SimpleDateFormat time = new SimpleDateFormat("dd-MM-yy");
+		Date date = new Date();
+		String pdate = time.format(date);
+		
+		//purchase date and ticket numbers
+		System.out.println(pdate+" "+numbers);
+	}
+	
+	
+	public ArrayList <ArrayList> tickets() {
+		
+		Scanner scanner = new Scanner(System.in);
+		System.out.println("How many tickets do you want?");
+		int ticket = scanner.nextInt();
+		ArrayList <ArrayList> tickets = new ArrayList <ArrayList>();
+			
+		while(true) {
+			tickets.add(ticket());
+			print();
+			ticket--;
+			
+			if (ticket==0) {break;}
+		}
+
+		return tickets;
+	}
+
+	
+	//See if there's a winner in your collection
+	public void jackpot(ArrayList <ArrayList> tickets) {
+		
+		//Check true, if all six numbers are correct.
+		boolean check =false;
+
+		int tmp; 
+		Random rand = new Random();
+		ArrayList <Integer> jackpot = new ArrayList <Integer>();
+		
+		while(true) {
+			tmp = rand.nextInt(45)+1;
+			
+			//no overlap
+			if (jackpot.indexOf(tmp)==-1) {jackpot.add(tmp);}
+		
+		//break after getting 6
+		if (jackpot.size()==6) {
+			
+			Collections.sort(jackpot);
+			break;
+		}
+		}
+
+		//run through tickets one by one
+		for (int i =0; i <tickets.size(); i++) {
+			
+			//the six jackpot numbers
+			for (int j=0; j<jackpot.size(); j++) {
+			
+				//compare with each of your tickets
+				if (tickets.get(i).get(j)==jackpot.get(j)) {check = true;}
+				
+				//Not all six means nothing.
+				else {
+					check=false;
+					break;
+				}
+			}
+		
+			if (check) {System.out.println("/n$$$ JackPot $$$");}
+		}
+		
+		//print jackpot number at the bottom
+		System.out.println("\nWinning # "+jackpot+"\n");
+	}
+}
+
+
+-------------------------------------------------------------------------------
+
+package game;
+import java.util.ArrayList;
+
+public class Main {
+
+	public static void main(String[] args) {
+	
+		Lotto lotto = new Lotto();
+			
+		ArrayList <ArrayList> tickets = new ArrayList <ArrayList> ();
+		tickets=lotto.tickets();
+		lotto.jackpot(tickets);	
+}
+}
