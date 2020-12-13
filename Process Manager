@@ -1,0 +1,226 @@
+package procmanager;
+import java.util.Scanner;
+
+public class MainFiles {
+
+	public static void main(String[] args) {
+	
+		Scanner input = new Scanner(System.in);
+		int menu = 0;
+		String find =null;
+		
+		ProcFile p = new ProcFile(); 
+
+		while(true) {
+		
+			System.out.println("");
+			System.out.println("1. Process List");
+			System.out.println("2. Search by Name");
+			System.out.println("3. Search by PID");
+			System.out.println("4. Kill by Name");
+			System.out.println("5. Kill by PID");
+						
+			menu = input.nextInt();
+			input.nextLine();
+		
+			switch(menu) {
+			case 1:
+				p.list_all();
+				break;
+			case 2:
+				System.out.println("Process Name: ");
+				find = input.nextLine();
+				p.img_find(find);
+				break;
+			case 3:
+				System.out.println("Process ID: ");
+				find = input.nextLine();
+				p.pid_find(find);
+				break;
+			case 4:
+      	System.out.println("Process Name: ");
+				find = input.nextLine();
+				p.img_kill(find);
+				break;
+			case 5:
+      	System.out.println("Process ID: ");
+				find = input.nextLine();
+				p.pid_kill(find);
+				break;
+			}
+		}
+}
+}
+
+
+------------------------------------------------------------------------------
+package procmanager;
+import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public class ProcFile {
+
+	// Print Process List 
+	public void list_all() {
+
+		ArrayList<String> list = new ArrayList<String>();
+		list.add("tasklist");
+		list.add("/SVC");
+		list.add("/FO");
+		list.add("csv");
+		
+		String data = null;
+
+		try {
+			
+			Process ps = new ProcessBuilder(list).start();
+			BufferedReader br = new BufferedReader(new InputStreamReader(ps.getInputStream()));
+			data = br.readLine();
+
+			while (true) {
+			
+				data = br.readLine();
+
+				if (data == null) {break;}
+				
+				data = data.replaceAll("\"", "");
+				System.out.printf("%s\t%s\n", data.split(",")[0], data.split(",")[1]);
+			}
+
+			ps.destroy();
+			
+		} catch (Exception e) {e.printStackTrace();}	
+	}
+
+
+	public void pid_find(String dst) {
+	
+		ArrayList<String> list = new ArrayList<String>();
+		list.add("TASKLIST");
+		list.add("/FI");
+		list.add("\"PID eq");
+		list.add(dst);
+		list.add("\"");
+
+		String src;
+		String data = null;
+
+		try {
+
+			Process ps = new ProcessBuilder(list).start();
+			BufferedReader br = new BufferedReader(new InputStreamReader(ps.getInputStream()));
+			data = br.readLine();
+
+			while (true) {
+
+				data = br.readLine();
+
+				if (data == null) {
+					System.out.println("None");
+					break;
+				}
+				
+				data = data.replaceAll("\"", "");
+				src = data.split(",")[1];
+
+				if (src.equals(dst)) {
+					System.out.printf("%s\t%s\n", data.split(",")[0], data.split(",")[1]);
+				}
+			}
+			ps.destroy();
+			
+		} catch (Exception e) {e.printStackTrace();}	
+	}
+
+
+	public void img_find(String dst) {
+
+		ArrayList<String> list = new ArrayList<String>(); 
+		list.add("TASKLIST");
+		list.add("/SVC");
+		list.add("/FO");
+		list.add("csv");
+
+		String src;
+		String data = null;
+
+		try {
+		
+			Process ps = new ProcessBuilder(list).start();
+			BufferedReader br = new BufferedReader(new InputStreamReader(ps.getInputStream()));
+			data = br.readLine();
+
+			while (true) {
+
+				data = br.readLine();
+
+				if (data == null) {break;}
+				
+				data = data.replaceAll("\"", "");
+				src = data.split(",")[0];
+
+				if (src.equals(dst)) {
+					System.out.printf("%s\t%s\n", data.split(",")[0], data.split(",")[1]);
+				}
+			}
+
+			ps.destroy();
+			
+		} catch (Exception e) {e.printStackTrace();}
+	}
+
+
+	public void img_kill(String find) {
+
+		ArrayList<String> list = new ArrayList<String>();		
+		list.add("TASKKILL");
+		list.add("/F");
+		list.add("/IM");
+		list.add(find);
+
+		String data = null;
+
+		try {
+
+			Process ps = new ProcessBuilder(list).start();
+			BufferedReader br = new BufferedReader(new InputStreamReader(ps.getInputStream()));
+			data = br.readLine();
+
+			while (data!=null) {
+				System.out.println(data);
+				data = br.readLine();
+				}
+				
+			ps.destroy();
+			
+		} catch (Exception e) {e.printStackTrace();}
+	}
+
+
+	public void pid_kill(String find) {
+		
+		ArrayList<String> list = new ArrayList<String>();
+		list.add("TASKKILL");
+		list.add("/F");
+		list.add("/PID");
+		list.add(find);
+
+		String data = null;
+
+		try {
+		
+			Process ps = new ProcessBuilder(list).start();
+			BufferedReader br = new BufferedReader(new InputStreamReader(ps.getInputStream()));
+			data = br.readLine();
+
+			while (data!=null) {
+				System.out.println(data);
+				data = br.readLine();
+				}
+
+			ps.destroy();
+			
+		} catch (Exception e) {e.printStackTrace();}
+	}
+}
