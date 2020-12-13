@@ -1,0 +1,49 @@
+package network;
+
+public class SocketMain {
+
+public static void main(String[] args) throws Exception {
+
+	PortScan p = null;
+
+	for (int i = 1; i <= 0xFFFF; i++) {
+  
+		p= new PortScan("IP address",i);
+		p.start();
+    
+		if(i%2000==0) {Thread.sleep(5000);}
+	}
+}
+}
+
+
+--------------------------------------------------------------------------
+
+package network;
+
+import java.net.Socket;
+
+public class PortScan extends Thread {
+
+	String ip= null;
+	int port= 0;
+
+	public PortScan(String ip, int port) {
+
+		this.ip = ip;
+		this.port = port;
+	}
+
+	@Override
+	public void run() {
+    Socket s = null; 
+
+		try {
+      s = new Socket(this.ip, this.port);
+			System.out.println("open :"+this.port);
+			s.close();
+      
+		} catch (Exception e) {} 
+	}}
+  
+  
