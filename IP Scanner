@@ -1,0 +1,52 @@
+package ip;
+
+import java.util.Scanner;
+import org.icmp4j.IcmpPingRequest;
+import org.icmp4j.IcmpPingResponse;
+import org.icmp4j.IcmpPingUtil;
+
+public class IpMain {
+	
+	public static void main(final String[] args) throws Exception {
+
+		ipScan ip = null;
+		Scanner scanner = new Scanner(System.in);
+		String ipAddr = null;
+		System.out.println("IP Address: ");
+		ipAddr = scanner.nextLine();
+		ip = new ipScan(ipAddr, 1);
+		ip.start();
+	}
+}
+
+class ipScan extends Thread {
+	
+	String ip = null;
+	int count;
+	
+	ipScan(String ip, int count) {this.ip = ip;}
+
+	@Override
+	public void run() {
+	
+		IcmpPingRequest request = IcmpPingUtil.createIcmpPingRequest();
+		request.setHost(ip);		
+		String[] iptmp =ip.split("[.]");
+		ip=iptmp[0]+"."+iptmp[1]+"."+iptmp[2]+".";
+
+		for (count = 1; count <= 255; count++) {
+			request.setHost(ip + count);
+			IcmpPingResponse response = IcmpPingUtil.executePingRequest(request);
+			String formattedResponse = IcmpPingUtil.formatResponse(response);
+			formattedResponse = formattedResponse.toLowerCase();
+			
+			//-1 means unreachable
+			if(formattedResponse.indexOf("reply")!= -1) {
+			System.out.println();
+			System.out.println(ip + count);
+			System.out.println(formattedResponse);
+			System.out.println();
+			}else{System.out.println("Unreachable:"+ip + count);}
+		}
+	}
+}
