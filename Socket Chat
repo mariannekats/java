@@ -1,0 +1,161 @@
+package com.i2sec.server;
+
+import java.io.BufferedWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+
+public class i2secService {
+
+	public static void main(String[] args)  {
+
+		ServerSocket server = null; 
+		Socket s = null;
+		Msg msg = null;
+		ArrayList <Msg> list = new ArrayList <Msg> ();
+		ArrayList <BufferedWriter> w = new ArrayList <BufferedWriter> ();
+
+		try {
+			server = new ServerSocket(100);
+
+			while(true) {
+			s = server.accept();
+			msg = new Msg(s,w);
+			msg.start();
+			list.add(msg);
+
+			System.out.println("Connection #:"+list.size());
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+
+--------------------------------------------------------------------------
+
+package com.i2sec.server;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.util.ArrayList;
+
+public class Msg extends Thread {
+
+	private Socket s = null;
+	ArrayList<BufferedWriter> w = null;
+
+	public Msg(Socket s, ArrayList<BufferedWriter> w) {
+		this.s = s;
+		this.w = w;
+	}
+
+	@Override
+	public void run() {
+		BufferedReader request = null;
+		BufferedWriter response = null;
+		String data = null;
+
+		try {
+			request = new BufferedReader(new InputStreamReader(this.s.getInputStream(), "UTF-8"));
+			response = new BufferedWriter(new OutputStreamWriter(this.s.getOutputStream(), "UTF-8"));
+			w.add(response);
+
+			while (true) {
+				try {
+					data = request.readLine();
+					Thread.sleep(10);
+					System.out.println(data);
+
+					for (BufferedWriter bufferedWriter : w) {
+						bufferedWriter.write(data + "\n");
+					}
+
+					response.write(data + "\n");
+					Thread.sleep(10);
+					response.flush();
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+
+--------------------------------------------------------------------------
+
+package com.i2sec.client;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class User {
+
+	public static void main(String[] args) {
+
+		Scanner input = new Scanner(System.in,"UTF-8");
+		Socket socket = null;
+		String in = null;
+		BufferedReader request = null;
+		BufferedWriter response = null;
+		Read r = null;
+
+		System.out.println("Client started.");
+
+		try {
+			socket = new Socket("IP Address", Port Number);
+			response = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(),"UTF-8"));
+			request = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF-8"));
+			r =new Read(request);
+			r.start();
+
+			while (true) {
+				in = input.nextLine();
+				response.write(in + "\n");
+				Thread.sleep(10);
+				response.flush();
+				Thread.sleep(10);
+			}
+		} catch (Exception e) {e.printStackTrace();}
+	}
+}
+
+
+--------------------------------------------------------------------------
+
+package com.i2sec.client;
+
+import java.io.BufferedReader;
+
+public class Read extends Thread{
+
+	BufferedReader r = null;
+	public Read(BufferedReader r) {this.r=r;}
+
+	@Override
+	public void run() {
+		String msg = null;
+
+		try {
+				if(msg!=null) {
+					System.out.println(msg);
+				}
+					Thread.sleep(10);		
+		} catch (Exception e) {e.printStackTrace();}
+	}
+}
